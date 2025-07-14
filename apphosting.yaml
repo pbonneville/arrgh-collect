@@ -1,0 +1,19 @@
+# Firebase App Hosting configuration for Next.js
+runConfig:
+  runtime: nodejs20
+  
+env:
+  - variable: NODE_ENV
+    value: production
+
+# Optional: build configuration
+build:
+  commands:
+    - npm ci
+    - npm run build
+  
+# Optional: server configuration  
+cpu: 1
+memory: 1GiB
+concurrency: 100
+maxInstances: 100
