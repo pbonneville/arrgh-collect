@@ -61,10 +61,14 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ### Firebase Setup
 
-1. Create a new Firebase project at [Firebase Console](https://console.firebase.google.com)
-2. Enable Firebase App Hosting
-3. Copy your Firebase configuration to `.env.local`
-4. Deploy using Firebase CLI or GitHub integration
+Due to permission restrictions with CLI project creation, please follow the manual setup:
+
+1. **Manual Setup**: See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for detailed instructions
+2. **Quick Config**: Use the helper script after creating your project:
+   ```bash
+   node scripts/update-firebase-config.js
+   ```
+3. **GitHub Integration**: Connect your repository in Firebase Console for auto-deployment
 
 ## 🚀 Deployment
 
