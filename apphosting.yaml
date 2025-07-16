@@ -11,7 +11,7 @@ env:
     value: production
     availability: ["BUILD", "RUNTIME"]
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    value: AIzaSyC-Gj9f98-fu062IZCQw5elJmu05lLYx3M
+    secret: firebase-api-key
     availability: ["BUILD", "RUNTIME"]
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
     value: arrgh-collect-2025.firebaseapp.com
