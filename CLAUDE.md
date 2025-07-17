@@ -68,18 +68,34 @@ gcloud run deploy arrgh-collect \
 
 ### Current State
 - Clean Next.js application with landing page
-- No backend dependencies
+- No backend dependencies (Firebase completely removed)
 - Ready for collection management features to be built
-- Configured for Cloud Run deployment with buildpacks
+- Successfully deployed on Cloud Run with buildpacks
+- Public access enabled at: https://arrgh-collect-860937201650.us-central1.run.app
+
+### Repository Status
+- **Repository**: https://github.com/Paul-Bonneville-Labs/arrgh-collect
+- **Main branch**: Deployable and tested
+- **Last major change**: Migration from Firebase App Hosting to Cloud Run
+- **Security**: Domain Restricted Sharing policy resolved
 
 ### Code Style
 - Uses TypeScript strict mode
 - Tailwind CSS for styling with dark mode support
 - Next.js App Router with React 19
 - Path aliases configured (`@/*` → `./src/*`)
+- No external dependencies beyond Next.js core
 
 ### Build Process
 - Buildpacks automatically detect Next.js
 - Uses Node.js 20.x runtime (specified in package.json engines)
 - Production build: `npm ci` → `npm run build` → `npm start`
 - No custom configuration required
+- No Dockerfile needed
+
+### Deployment Status
+- **Platform**: Google Cloud Run
+- **Method**: Buildpacks (automatic containerization)
+- **Public Access**: Enabled
+- **Scaling**: Managed by Cloud Run
+- **Cost**: Pay-per-use model
