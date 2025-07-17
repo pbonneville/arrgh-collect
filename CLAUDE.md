@@ -10,60 +10,67 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
 
-### Firebase Configuration
-- `npm run firebase:config` - Interactive Firebase configuration setup (runs `node scripts/update-firebase-config.js`)
-
-### Firebase Deployment
-- `firebase deploy --only apphosting` - Deploy to Firebase App Hosting
-- `firebase use <project-id>` - Switch Firebase project
+### Cloud Run Deployment
+- `gcloud run deploy arrgh-collect --source . --region us-central1` - Deploy to Google Cloud Run
+- `gcloud services enable run.googleapis.com cloudbuild.googleapis.com` - Enable required APIs
 
 ## Project Architecture
 
 ### Tech Stack
 - **Framework**: Next.js 15 with App Router and TypeScript
 - **Styling**: Tailwind CSS v4 with dark mode support
-- **Backend**: Firebase (Firestore, Authentication, Storage)
-- **Hosting**: Firebase App Hosting
+- **Hosting**: Google Cloud Run with buildpacks
 - **Fonts**: Geist Sans and Geist Mono
+- **Runtime**: Node.js 20.x
 
 ### Project Structure
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx         # Root layout with metadata and fonts
-│   ├── page.tsx           # Landing page with feature preview
-│   └── globals.css        # Global styles
-└── lib/
-    └── firebase.ts        # Firebase initialization and config
+└── app/                    # Next.js App Router
+    ├── layout.tsx         # Root layout with metadata and fonts
+    ├── page.tsx           # Landing page with feature preview
+    └── globals.css        # Global styles
 ```
 
 ### Key Files
-- `apphosting.yaml` - Firebase App Hosting configuration with Node.js 20 runtime
-- `firebase.json` - Firebase project configuration
-- `scripts/update-firebase-config.js` - Interactive Firebase setup helper
+- `package.json` - Node.js 20.x engine specification for buildpacks
 - `tsconfig.json` - TypeScript configuration with `@/*` path aliases
+- `.env.local` - Local development environment variables
 
-## Firebase Setup
+## Cloud Run Deployment
 
-The project uses Firebase App Hosting with automatic GitHub deployments. Firebase configuration is managed through environment variables:
+The project uses Google Cloud Run with buildpacks for automatic containerization. No Dockerfile required - buildpacks auto-detect Next.js and configure appropriately.
 
+### Prerequisites
 ```bash
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
+# Install Google Cloud CLI
+# Initialize gcloud: gcloud init
+# Set project: gcloud config set project YOUR_PROJECT_ID
+# Enable APIs: gcloud services enable run.googleapis.com cloudbuild.googleapis.com
 ```
 
-Use `npm run firebase:config` to set up configuration interactively, or see `FIREBASE_SETUP.md` for manual setup instructions.
+### Deployment Process
+```bash
+# Deploy from source (buildpacks auto-detect Next.js)
+gcloud run deploy arrgh-collect --source . --region us-central1 --allow-unauthenticated
+
+# Deploy with custom settings
+gcloud run deploy arrgh-collect \
+  --source . \
+  --region us-central1 \
+  --memory 1Gi \
+  --cpu 1 \
+  --max-instances 100 \
+  --allow-unauthenticated
+```
 
 ## Development Notes
 
 ### Current State
-- Minimal landing page with feature preview
-- Firebase integration set up but not fully implemented
+- Clean Next.js application with landing page
+- No backend dependencies
 - Ready for collection management features to be built
+- Configured for Cloud Run deployment with buildpacks
 
 ### Code Style
 - Uses TypeScript strict mode
@@ -71,7 +78,8 @@ Use `npm run firebase:config` to set up configuration interactively, or see `FIR
 - Next.js App Router with React 19
 - Path aliases configured (`@/*` → `./src/*`)
 
-### Deployment
-- Pushes to `main` branch trigger automatic Firebase App Hosting deployment
-- Build process: `npm ci` → `npm run build`
-- Runtime: Node.js 20 with 1 CPU, 1GiB memory
+### Build Process
+- Buildpacks automatically detect Next.js
+- Uses Node.js 20.x runtime (specified in package.json engines)
+- Production build: `npm ci` → `npm run build` → `npm start`
+- No custom configuration required

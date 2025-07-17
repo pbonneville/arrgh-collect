@@ -2,15 +2,16 @@
   "name": "arrgh-collect",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "firebase:config": "node scripts/update-firebase-config.js"
+    "lint": "next lint"
   },
   "dependencies": {
-    "firebase": "^11.10.0",
     "next": "15.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
