@@ -26,9 +26,40 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { filename, content, frontmatter } = body;
 
-    if (!filename || !content || !frontmatter) {
+    // Validate required fields
+    if (!filename || typeof filename !== 'string') {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: filename, content, frontmatter' },
+        { success: false, error: 'Missing or invalid filename' },
+        { status: 400 }
+      );
+    }
+
+    if (!content || typeof content !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Missing or invalid content' },
+        { status: 400 }
+      );
+    }
+
+    if (!frontmatter || typeof frontmatter !== 'object') {
+      return NextResponse.json(
+        { success: false, error: 'Missing or invalid frontmatter' },
+        { status: 400 }
+      );
+    }
+
+    // Validate filename format
+    if (!/^[a-zA-Z0-9._-]+\.md$/.test(filename)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid filename format. Must be alphanumeric with .md extension' },
+        { status: 400 }
+      );
+    }
+
+    // Validate content length
+    if (content.length > 1000000) {
+      return NextResponse.json(
+        { success: false, error: 'Content too large. Maximum 1MB allowed' },
         { status: 400 }
       );
     }

@@ -10,6 +10,7 @@ import { ToastContainer, useToasts } from '@/components/Toast';
 import { LoadingOverlay } from '@/components/LoadingSpinner';
 import { FileInfo, MarkdownFile, FrontmatterData, ApiResponse } from '@/types';
 import { LogOut, User, Settings, RefreshCw } from 'lucide-react';
+import appConfig from '../../../config.json';
 
 function DashboardContent() {
   const { data: session } = useSession();
@@ -197,7 +198,7 @@ function DashboardContent() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Text Management
+              {appConfig.app.displayName}
             </h1>
             <button
               onClick={() => {
@@ -292,7 +293,7 @@ function DashboardContent() {
                   <Settings className="h-8 w-8 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  Welcome to Text Management
+                  Welcome to {appConfig.app.displayName}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
                   Select a file from the sidebar to start editing, or create a new file to get started.

@@ -10,23 +10,20 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     console.log('Session in GET /api/files/list:', session ? 'exists' : 'null');
     
-    // TEMPORARY: Skip auth for debugging - remove this in production
-    console.log('TEMPORARY: Bypassing auth for debugging');
-    
-    // if (!session || !session.user) {
-    //   return NextResponse.json(
-    //     { success: false, error: 'Unauthorized' },
-    //     { status: 401 }
-    //   );
-    // }
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
-    // // Check read permissions
-    // if (!session.user.permissions?.read) {
-    //   return NextResponse.json(
-    //     { success: false, error: 'Insufficient permissions' },
-    //     { status: 403 }
-    //   );
-    // }
+    // Check read permissions
+    if (!session.user.permissions?.read) {
+      return NextResponse.json(
+        { success: false, error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
 
     // Get file list from GitHub
     const files = await githubClient.listMarkdownFiles();

@@ -11,27 +11,42 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     console.log('Session in GET /api/files/[filename]:', session ? 'exists' : 'null');
     console.log('Request cookies:', request.cookies.toString());
     
-    // TEMPORARY: Skip auth for debugging - remove this in production
-    console.log('TEMPORARY: Bypassing auth for debugging');
-    
-    // if (!session || !session.user) {
-    //   console.log('No session or user, returning 401');
-    //   return NextResponse.json(
-    //     { success: false, error: 'Unauthorized' },
-    //     { status: 401 }
-    //   );
-    // }
+    if (!session || !session.user) {
+      console.log('No session or user, returning 401');
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
-    // // Check read permissions
-    // if (!session.user.permissions?.read) {
-    //   return NextResponse.json(
-    //     { success: false, error: 'Insufficient permissions' },
-    //     { status: 403 }
-    //   );
-    // }
+    // Check read permissions
+    if (!session.user.permissions?.read) {
+      return NextResponse.json(
+        { success: false, error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
 
     const { filename } = await params;
+    
+    // Validate filename parameter
+    if (!filename || typeof filename !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid filename parameter' },
+        { status: 400 }
+      );
+    }
+    
     const decodedFilename = decodeURIComponent(filename);
+    
+    // Validate decoded filename format
+    if (!/^[a-zA-Z0-9._-]+\.md$/.test(decodedFilename)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid filename format. Must be alphanumeric with .md extension' },
+        { status: 400 }
+      );
+    }
+    
     console.log('Fetching file:', decodedFilename);
     
     // Get file content from GitHub
@@ -75,13 +90,54 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const { filename } = await params;
+    
+    // Validate filename parameter
+    if (!filename || typeof filename !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid filename parameter' },
+        { status: 400 }
+      );
+    }
+    
     const decodedFilename = decodeURIComponent(filename);
+    
+    // Validate decoded filename format
+    if (!/^[a-zA-Z0-9._-]+\.md$/.test(decodedFilename)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid filename format. Must be alphanumeric with .md extension' },
+        { status: 400 }
+      );
+    }
+    
     const body = await request.json();
     const { content, frontmatter, sha } = body;
 
-    if (!content || !frontmatter || !sha) {
+    // Validate required fields
+    if (!content || typeof content !== 'string') {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: content, frontmatter, sha' },
+        { success: false, error: 'Missing or invalid content' },
+        { status: 400 }
+      );
+    }
+
+    if (!frontmatter || typeof frontmatter !== 'object') {
+      return NextResponse.json(
+        { success: false, error: 'Missing or invalid frontmatter' },
+        { status: 400 }
+      );
+    }
+
+    if (!sha || typeof sha !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Missing or invalid sha' },
+        { status: 400 }
+      );
+    }
+
+    // Validate content length
+    if (content.length > 1000000) {
+      return NextResponse.json(
+        { success: false, error: 'Content too large. Maximum 1MB allowed' },
         { status: 400 }
       );
     }

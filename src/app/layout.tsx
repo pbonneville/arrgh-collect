@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import appConfig from "../../config.json";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Text Management - GitHub-Backed Documentation",
-  description: "A GitHub-backed markdown file management system with OAuth authentication and pull request workflows. Organize, edit, and collaborate on your documentation.",
-  keywords: "markdown, documentation, GitHub, OAuth, collaboration, text management, pull requests",
+  title: `${appConfig.app.displayName} - GitHub-Backed Documentation`,
+  description: appConfig.app.description,
+  keywords: appConfig.app.keywords,
 };
 
 export default function RootLayout({
