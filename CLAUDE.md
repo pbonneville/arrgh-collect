@@ -18,18 +18,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Tech Stack
 - **Framework**: Next.js 15 with App Router and TypeScript
+- **Authentication**: NextAuth.js with GitHub OAuth provider
+- **Editor**: MDXEditor for enhanced markdown editing experience
+- **API Integration**: GitHub REST API via Octokit for repository operations
 - **Styling**: Tailwind CSS v4 with dark mode support
-- **Hosting**: Google Cloud Run with buildpacks
+- **Hosting**: Google Cloud Run with buildpacks (automatic containerization)
 - **Fonts**: Geist Sans and Geist Mono
 - **Runtime**: Node.js 20.x
 
 ### Project Structure
 ```
 src/
-└── app/                    # Next.js App Router
-    ├── layout.tsx         # Root layout with metadata and fonts
-    ├── page.tsx           # Landing page with feature preview
-    └── globals.css        # Global styles
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   ├── auth/          # NextAuth.js authentication
+│   │   └── files/         # File management endpoints
+│   ├── dashboard/         # Main application interface
+│   ├── layout.tsx         # Root layout with providers
+│   ├── page.tsx           # Landing page with GitHub login
+│   └── globals.css        # Global styles
+├── components/            # Reusable React components
+│   ├── FileList.tsx       # Repository file browser
+│   ├── MarkdownEditor.tsx # MDX editor with frontmatter
+│   ├── FrontmatterForm.tsx # YAML metadata form
+│   ├── CreateFileModal.tsx # New file creation
+│   └── Providers.tsx      # NextAuth session provider
+├── lib/                   # Utility libraries
+│   ├── auth.ts           # NextAuth configuration
+│   └── github.ts         # GitHub API client
+└── types/                 # TypeScript definitions
+    └── index.ts
 ```
 
 ### Key Files
@@ -66,12 +84,14 @@ gcloud run deploy arrgh-collect \
 
 ## Development Notes
 
-### Current State
-- Clean Next.js application with landing page
-- No backend dependencies (Firebase completely removed)
-- Ready for collection management features to be built
-- Successfully deployed on Cloud Run with buildpacks
-- Public access enabled at: https://arrgh-collect-860937201650.us-central1.run.app
+### Current State - Phase 1 MVP Complete ✅
+- **Full GitHub OAuth Authentication**: NextAuth.js integration with repository permission mapping
+- **File Management System**: Browse, create, edit markdown files from GitHub repository
+- **Enhanced Editor**: MDXEditor with frontmatter forms and live preview
+- **Pull Request Workflow**: Automatic branch creation and PR generation for all changes
+- **Responsive Design**: Mobile-optimized with collapsible sidebars
+- **Role-Based Access**: Owner, Maintainer, Contributor, Reader permissions
+- **Production Ready**: Successfully builds and deploys on Cloud Run
 
 ### Repository Status
 - **Repository**: https://github.com/Paul-Bonneville-Labs/arrgh-collect
