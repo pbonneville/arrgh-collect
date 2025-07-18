@@ -112,18 +112,11 @@ function MDXEditorComponent({ file, onSave, onCancel, isLoading = false }: Markd
         </div>
       )}
       
-      {/* Frontmatter Form */}
-      <div className="flex-shrink-0 p-4">
-        <FrontmatterForm 
-          frontmatter={frontmatter}
-          onChange={setFrontmatter}
-          isReadOnly={isDisabled}
-        />
-      </div>
-
-      {/* MDX Editor */}
-      <div className="flex-1 p-4 min-h-0">
-        <div className="w-full bg-white rounded-lg shadow-lg p-6">
+      {/* Main Content Area - Side by Side Layout */}
+      <div className="flex-1 flex min-h-0">
+        {/* MDX Editor - 70% width */}
+        <div className="flex-1 p-4 min-h-0" style={{ width: '70%' }}>
+          <div className="w-full bg-white rounded-lg shadow-lg p-6">
           <MDXEditor
             key={`${file?.filename || 'new-file'}-${file?.sha || 'new'}`} // Force reset when file changes
             markdown={content}
@@ -194,6 +187,16 @@ function MDXEditorComponent({ file, onSave, onCancel, isLoading = false }: Markd
             className="min-h-[400px]"
             readOnly={isDisabled}
             placeholder={isDisabled ? 'Loading...' : 'Start writing your markdown content...'}
+          />
+          </div>
+        </div>
+
+        {/* Frontmatter Form - 30% width */}
+        <div className="flex-shrink-0 p-4" style={{ width: '30%' }}>
+          <FrontmatterForm 
+            frontmatter={frontmatter}
+            onChange={setFrontmatter}
+            isReadOnly={isDisabled}
           />
         </div>
       </div>

@@ -27,7 +27,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
         Frontmatter
       </h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {/* Title */}
         <div>
           <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
@@ -104,7 +104,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
       </div>
 
       {/* Timestamps (read-only) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4">
+      <div className="grid grid-cols-1 gap-4 mt-4 pt-4">
         {formData.created && (
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
