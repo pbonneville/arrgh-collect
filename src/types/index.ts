@@ -22,6 +22,7 @@ export interface UserPermissions {
 export interface FileInfo {
   name: string;
   path: string;
+  directory: string; // Directory path (empty string for root)
   sha: string;
   size: number;
   type: 'file' | 'dir';

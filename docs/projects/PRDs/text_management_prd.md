@@ -222,7 +222,7 @@ metadata:
 - **Response Format**: JSON with consistent error handling
 
 #### Core API Routes (Phase 1 Simplified)
-```
+```text
 /api/auth/[...nextauth]              # NextAuth.js authentication
 /api/files/list                      # Get all .md files in repo root
 /api/files/[filename]                # Get specific file content and frontmatter
@@ -523,7 +523,7 @@ export class GitHubFileManager {
 ```
 
 #### UI Layout Structure
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │ Header: Logo | Nexus | Codex | Lexicon | Admin    Login    │
 ├─────────────────────────────────────────────────────────────┤
