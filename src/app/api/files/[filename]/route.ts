@@ -39,10 +39,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     
     const decodedFilename = decodeURIComponent(filename);
     
-    // Validate decoded filename format
-    if (!/^[a-zA-Z0-9._-]+\.md$/.test(decodedFilename)) {
+    // Validate decoded filename format - allow spaces and common characters but prevent path traversal
+    if (!/^[a-zA-Z0-9._\s-]+\.md$/.test(decodedFilename) || decodedFilename.includes('..') || decodedFilename.includes('/') || decodedFilename.includes('\\')) {
       return NextResponse.json(
-        { success: false, error: 'Invalid filename format. Must be alphanumeric with .md extension' },
+        { success: false, error: 'Invalid filename format. Must end with .md and contain only letters, numbers, spaces, dots, underscores, and hyphens' },
         { status: 400 }
       );
     }
@@ -101,10 +101,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     
     const decodedFilename = decodeURIComponent(filename);
     
-    // Validate decoded filename format
-    if (!/^[a-zA-Z0-9._-]+\.md$/.test(decodedFilename)) {
+    // Validate decoded filename format - allow spaces and common characters but prevent path traversal
+    if (!/^[a-zA-Z0-9._\s-]+\.md$/.test(decodedFilename) || decodedFilename.includes('..') || decodedFilename.includes('/') || decodedFilename.includes('\\')) {
       return NextResponse.json(
-        { success: false, error: 'Invalid filename format. Must be alphanumeric with .md extension' },
+        { success: false, error: 'Invalid filename format. Must end with .md and contain only letters, numbers, spaces, dots, underscores, and hyphens' },
         { status: 400 }
       );
     }
