@@ -1,48 +1,93 @@
-# Arrgh Collect
+# Text Management Application
 
-A modern collection management platform built with Next.js and deployed on Google Cloud Run.
+A GitHub-backed markdown file management system with OAuth authentication and pull request workflows. Organize, edit, and collaborate on your documentation seamlessly.
 
 ## 🚀 Features
 
-- **Organize Collections**: Intuitive tools for categorizing and managing items
-- **Track Progress**: Detailed analytics and insights for collection growth
-- **Secure Storage**: Enterprise-grade security with cloud backend
-- **Responsive Design**: Beautiful UI with Tailwind CSS and dark mode support
+### Core Functionality
+- **GitHub OAuth Authentication**: Secure login with repository permission mapping
+- **File Management Interface**: Browse and manage `.md` files from your GitHub repository root
+- **Enhanced Markdown Editor**: Rich text editing with MDXEditor, frontmatter forms, and live preview
+- **Pull Request Workflow**: All changes automatically create PRs for review and collaboration
+- **Responsive Design**: Mobile-optimized interface with collapsible sidebars
+
+### User Experience
+- **Role-Based Access**: Automatic role mapping from GitHub repository permissions (Owner, Maintainer, Contributor, Reader)
+- **Real-Time Feedback**: Loading states, error handling, and success notifications
+- **Search & Filter**: Quickly find files with built-in search functionality
+- **Dark Mode Support**: Beautiful UI that adapts to system preferences
 
 ## 🛠 Tech Stack
 
-- **Frontend**: Next.js 15 with App Router, TypeScript, Tailwind CSS
-- **Hosting**: Google Cloud Run with Buildpacks
+- **Framework**: Next.js 15 with App Router and TypeScript
+- **Authentication**: NextAuth.js with GitHub OAuth provider
+- **Editor**: MDXEditor for enhanced markdown editing
+- **Styling**: Tailwind CSS v4 with dark mode support
+- **API Integration**: GitHub REST API via Octokit
+- **Deployment**: Google Cloud Run with buildpacks
 - **Runtime**: Node.js 20.x
-- **Build System**: Buildpacks (automatic containerization)
 
 ## 🏃‍♂️ Quick Start
 
 ### Prerequisites
 
-- Node.js 20+
-- Google Cloud CLI (for deployment)
-- Git
+- **Node.js 20+**: Required for the Next.js application
+- **GitHub Account**: For OAuth authentication and repository access
+- **GitHub Repository**: A repository containing `.md` files you want to manage
+- **GitHub OAuth App**: Create one at [GitHub Developer Settings](https://github.com/settings/applications/new)
 
-### Installation
+### Setup Instructions
 
-1. Clone the repository:
+#### 1. Clone the Repository
 ```bash
 git clone https://github.com/Paul-Bonneville-Labs/arrgh-collect.git
 cd arrgh-collect
 ```
 
-2. Install dependencies:
+#### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-3. Run the development server:
+#### 3. Configure Environment Variables
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` with your actual values:
+```bash
+# GitHub OAuth Configuration
+GITHUB_CLIENT_ID=your_github_oauth_client_id
+GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
+
+# GitHub Repository Configuration  
+GITHUB_TOKEN=ghp_your_github_personal_access_token
+GITHUB_REPO_OWNER=your-github-username
+GITHUB_REPO_NAME=your-content-repository-name
+
+# NextAuth.js Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_random_secret_string
+```
+
+#### 4. Create GitHub OAuth App
+1. Go to [GitHub Developer Settings](https://github.com/settings/applications/new)
+2. Set **Application name**: Text Management App
+3. Set **Homepage URL**: `http://localhost:3000`
+4. Set **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
+5. Copy the **Client ID** and **Client Secret** to your `.env.local`
+
+#### 5. Generate GitHub Personal Access Token
+1. Go to [GitHub Token Settings](https://github.com/settings/tokens)
+2. Generate new token with `repo` scope for your content repository
+3. Copy the token to your `.env.local`
+
+#### 6. Run Development Server
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+Open [http://localhost:3000](http://localhost:3000) and sign in with GitHub!
 
 ## 🔧 Development
 
