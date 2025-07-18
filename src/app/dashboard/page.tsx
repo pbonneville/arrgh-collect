@@ -66,7 +66,7 @@ function DashboardContent() {
   // Load files on mount - but only once
   useEffect(() => {
     loadFiles();
-  }, []); // Empty dependency array - load only once on mount
+  }, [loadFiles]); // Include loadFiles dependency
 
   const loadFile = useCallback(async (filename: string) => {
     try {

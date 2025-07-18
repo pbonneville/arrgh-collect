@@ -2,25 +2,35 @@ import { Octokit } from '@octokit/rest';
 import matter from 'gray-matter';
 import { FileInfo, MarkdownFile, FrontmatterData, CreateFileResponse, GitHubPullRequest } from '@/types';
 
-// Configuration from environment variables
-const config = {
-  token: process.env.GITHUB_TOKEN!,
-  owner: process.env.GITHUB_REPO_OWNER!,
-  repo: process.env.GITHUB_REPO_NAME!,
-};
+// Lazy initialization of GitHub client to avoid build-time errors
+let octokit: Octokit | null = null;
+let config: { token: string; owner: string; repo: string } | null = null;
 
-// Validate required environment variables
-const requiredVars = ['GITHUB_TOKEN', 'GITHUB_REPO_OWNER', 'GITHUB_REPO_NAME'];
-requiredVars.forEach(varName => {
-  if (!process.env[varName]) {
-    throw new Error(`Missing required environment variable: ${varName}`);
+function initializeGitHubClient() {
+  if (!config) {
+    // Validate required environment variables at runtime
+    const requiredVars = ['GITHUB_TOKEN', 'GITHUB_REPO_OWNER', 'GITHUB_REPO_NAME'];
+    const missingVars = requiredVars.filter(varName => !process.env[varName]);
+    
+    if (missingVars.length > 0) {
+      throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+    }
+
+    config = {
+      token: process.env.GITHUB_TOKEN!,
+      owner: process.env.GITHUB_REPO_OWNER!,
+      repo: process.env.GITHUB_REPO_NAME!,
+    };
   }
-});
 
-// Initialize Octokit client
-const octokit = new Octokit({
-  auth: config.token,
-});
+  if (!octokit) {
+    octokit = new Octokit({
+      auth: config.token,
+    });
+  }
+
+  return { octokit, config };
+}
 
 export class GitHubFileManager {
   /**
@@ -28,6 +38,7 @@ export class GitHubFileManager {
    */
   async listMarkdownFiles(): Promise<FileInfo[]> {
     try {
+      const { octokit, config } = initializeGitHubClient();
       const { data } = await octokit.rest.repos.getContent({
         owner: config.owner,
         repo: config.repo,
@@ -62,6 +73,7 @@ export class GitHubFileManager {
    */
   async getFileContent(filename: string): Promise<MarkdownFile> {
     try {
+      const { octokit, config } = initializeGitHubClient();
       const { data } = await octokit.rest.repos.getContent({
         owner: config.owner,
         repo: config.repo,
@@ -101,6 +113,7 @@ export class GitHubFileManager {
     frontmatter: FrontmatterData
   ): Promise<CreateFileResponse> {
     try {
+      const { octokit, config } = initializeGitHubClient();
       // Ensure filename ends with .md
       if (!filename.endsWith('.md')) {
         filename += '.md';
@@ -176,6 +189,7 @@ export class GitHubFileManager {
     sha: string
   ): Promise<CreateFileResponse> {
     try {
+      const { octokit, config } = initializeGitHubClient();
       // Create branch name with timestamp
       const timestamp = Date.now();
       const branchName = `edit-${filename.replace('.md', '')}-${timestamp}`;
@@ -241,6 +255,7 @@ export class GitHubFileManager {
    */
   async getUserPermissions(username: string): Promise<{ permission: string; user: { login: string; avatar_url: string } }> {
     try {
+      const { octokit, config } = initializeGitHubClient();
       const { data } = await octokit.rest.repos.getCollaboratorPermissionLevel({
         owner: config.owner,
         repo: config.repo,
@@ -265,6 +280,7 @@ export class GitHubFileManager {
    */
   async getRecentPullRequests(limit: number = 10): Promise<GitHubPullRequest[]> {
     try {
+      const { octokit, config } = initializeGitHubClient();
       const { data } = await octokit.rest.pulls.list({
         owner: config.owner,
         repo: config.repo,
@@ -299,6 +315,7 @@ export class GitHubFileManager {
    */
   async validateRepositoryAccess(): Promise<boolean> {
     try {
+      const { octokit, config } = initializeGitHubClient();
       await octokit.rest.repos.get({
         owner: config.owner,
         repo: config.repo,
@@ -314,5 +331,8 @@ export class GitHubFileManager {
 // Export singleton instance
 export const githubClient = new GitHubFileManager();
 
-// Export configuration for use in other modules
-export { config as githubConfig };
+// Export configuration getter for use in other modules
+export function getGitHubConfig() {
+  const { config } = initializeGitHubClient();
+  return config;
+}
