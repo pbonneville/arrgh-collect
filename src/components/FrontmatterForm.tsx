@@ -21,7 +21,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
+    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-4">
       <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
         <span className="mr-2">📝</span>
         Frontmatter
@@ -38,7 +38,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
             value={formData.title || ''}
             onChange={(e) => handleChange('title', e.target.value)}
             disabled={isReadOnly}
-            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
+            className="w-full px-3 py-2 text-sm rounded-md 
                      bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                      disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500"
@@ -55,7 +55,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
             type="text"
             value={formData.author || ''}
             disabled
-            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
+            className="w-full px-3 py-2 text-sm rounded-md 
                      bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
             placeholder="Automatically set from user"
           />
@@ -70,7 +70,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
             value={formData.status || 'draft'}
             onChange={(e) => handleChange('status', e.target.value)}
             disabled={isReadOnly}
-            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
+            className="w-full px-3 py-2 text-sm rounded-md 
                      bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                      disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500"
@@ -91,7 +91,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
             value={Array.isArray(formData.tags) ? formData.tags.join(', ') : ''}
             onChange={(e) => handleTagsChange(e.target.value)}
             disabled={isReadOnly}
-            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
+            className="w-full px-3 py-2 text-sm rounded-md 
                      bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                      disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500"
@@ -104,7 +104,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
       </div>
 
       {/* Timestamps (read-only) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4">
         {formData.created && (
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
@@ -114,7 +114,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
               type="text"
               value={new Date(formData.created).toLocaleString()}
               disabled
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
+              className="w-full px-3 py-2 text-sm rounded-md 
                        bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
             />
           </div>
@@ -129,7 +129,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
               type="text"
               value={new Date(formData.modified).toLocaleString()}
               disabled
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
+              className="w-full px-3 py-2 text-sm rounded-md 
                        bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
             />
           </div>
@@ -152,7 +152,7 @@ export function FrontmatterForm({ frontmatter, onChange, isReadOnly = false }: F
               value={typeof value === 'string' ? value : JSON.stringify(value)}
               onChange={(e) => handleChange(key, e.target.value)}
               disabled={isReadOnly}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
+              className="w-full px-3 py-2 text-sm rounded-md 
                        bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                        disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500"

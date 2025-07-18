@@ -93,7 +93,7 @@ function MDXEditorComponent({ file, onSave, onCancel, isLoading = false }: Markd
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
       {/* File Info Header */}
       {file && (
-        <div className="flex-shrink-0 px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+        <div className="flex-shrink-0 px-4 py-3 bg-gray-50 dark:bg-gray-800">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +113,7 @@ function MDXEditorComponent({ file, onSave, onCancel, isLoading = false }: Markd
       )}
       
       {/* Frontmatter Form */}
-      <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex-shrink-0 p-4">
         <FrontmatterForm 
           frontmatter={frontmatter}
           onChange={setFrontmatter}
@@ -199,7 +199,7 @@ function MDXEditorComponent({ file, onSave, onCancel, isLoading = false }: Markd
       </div>
 
       {/* Action Buttons */}
-      <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+      <div className="flex-shrink-0 p-4 bg-gray-50 dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {file?.filename ? `Editing: ${file.filename}` : 'Creating new file'}
@@ -210,7 +210,7 @@ function MDXEditorComponent({ file, onSave, onCancel, isLoading = false }: Markd
               onClick={handleCancel}
               disabled={isDisabled}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 
-                       bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 
+                       bg-white dark:bg-gray-700 
                        rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 
                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                        disabled:opacity-50 disabled:cursor-not-allowed

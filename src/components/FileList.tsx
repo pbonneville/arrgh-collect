@@ -18,9 +18,9 @@ export function FileList({
   );
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex-shrink-0 p-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Files
@@ -47,7 +47,7 @@ export function FileList({
       </div>
 
       {/* Search */}
-      <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex-shrink-0 p-4">
         <div className="relative">
           <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
@@ -55,7 +55,7 @@ export function FileList({
             placeholder="Search files..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 
+            className="w-full pl-10 pr-3 py-2 text-sm 
                      rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                      placeholder-gray-500 dark:placeholder-gray-400
                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -128,7 +128,7 @@ export function FileList({
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+      <div className="flex-shrink-0 p-4 bg-gray-50 dark:bg-gray-800">
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
           Repository: {process.env.NEXT_PUBLIC_GITHUB_REPO_NAME || 'Loading...'}
         </p>

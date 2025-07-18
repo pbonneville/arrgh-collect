@@ -194,7 +194,7 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+      <header className="bg-white dark:bg-gray-800 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -261,7 +261,7 @@ function DashboardContent() {
           ) : currentFile ? (
             <div className="flex flex-col h-full">
               {/* Mobile Back Button */}
-              <div className="lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+              <div className="lg:hidden bg-white dark:bg-gray-800 px-4 py-2">
                 <button
                   onClick={handleCancelEdit}
                   className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
