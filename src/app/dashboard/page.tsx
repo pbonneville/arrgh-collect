@@ -1,0 +1,337 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import dynamic from 'next/dynamic';
+import { FileList } from '@/components/FileList';
+import { MarkdownEditor } from '@/components/MarkdownEditor';
+import { CreateFileModal } from '@/components/CreateFileModal';
+import { ToastContainer, useToasts } from '@/components/Toast';
+import { LoadingOverlay } from '@/components/LoadingSpinner';
+import { FileInfo, MarkdownFile, FrontmatterData, ApiResponse } from '@/types';
+import { LogOut, User, Settings, RefreshCw } from 'lucide-react';
+
+function DashboardContent() {
+  const { data: session } = useSession();
+  const { toasts, dismissToast } = useToasts();
+  const [mounted, setMounted] = useState(false);
+  
+  // State management
+  const [files, setFiles] = useState<FileInfo[]>([]);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [currentFile, setCurrentFile] = useState<MarkdownFile | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEditorLoading, setIsEditorLoading] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false); // Guard to prevent multiple loads
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const loadFiles = useCallback(async () => {
+    if (hasLoaded) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/files/list', {
+        credentials: 'include',
+      });
+      const result: ApiResponse<FileInfo[]> = await response.json();
+      
+      if (result.success && result.data) {
+        setFiles(result.data);
+        setHasLoaded(true);
+      } else {
+        console.error('Failed to load files:', result.error);
+      }
+    } catch (err) {
+      console.error('Error loading files:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hasLoaded]);
+
+  // Redirect if not authenticated - TEMPORARILY DISABLED FOR TESTING
+  // useEffect(() => {
+  //   if (status === 'unauthenticated') {
+  //     router.push('/');
+  //   }
+  // }, [status, router]);
+
+  // Load files on mount - but only once
+  useEffect(() => {
+    loadFiles();
+  }, []); // Empty dependency array - load only once on mount
+
+  const loadFile = useCallback(async (filename: string) => {
+    try {
+      setIsEditorLoading(true);
+      
+      const response = await fetch(`/api/files/${encodeURIComponent(filename)}`, {
+        credentials: 'include',
+      });
+      const result: ApiResponse<MarkdownFile> = await response.json();
+      
+      // Validate that the response matches the requested file (prevent race conditions)
+      if (result.success && result.data && result.data.filename === filename) {
+        setCurrentFile(result.data);
+      } else if (result.success && result.data && result.data.filename !== filename) {
+        // Don't update state with stale response
+        return;
+      } else {
+        console.error('API error:', result.error);
+      }
+    } catch (err) {
+      console.error('Error loading file:', err);
+    } finally {
+      setIsEditorLoading(false);
+    }
+  }, []);
+
+  const handleFileSelect = (filename: string) => {
+    // Clear current file first to show loading state
+    setCurrentFile(null);
+    setSelectedFile(filename);
+    loadFile(filename);
+  };
+
+  const handleNewFile = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCreateFile = (filename: string) => {
+    // Create a new file object for editing
+    const newFile: MarkdownFile = {
+      filename,
+      path: filename,
+      content: `# ${filename.replace('.md', '').replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}\n\nStart writing your content here...\n`,
+      frontmatter: {
+        title: filename.replace('.md', '').replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        author: session?.user?.username || session?.user?.name || 'Test User',
+        status: 'draft',
+        tags: [],
+      },
+      sha: '', // Empty for new files
+      lastModified: '', // Will be set by server
+    };
+    
+    setCurrentFile(newFile);
+    setSelectedFile(filename);
+  };
+
+  const handleSaveFile = async (content: string, frontmatter: FrontmatterData) => {
+    if (!currentFile) return;
+
+    try {
+      const isNewFile = !currentFile.sha;
+      const url = isNewFile ? '/api/files/create' : `/api/files/${encodeURIComponent(currentFile.filename)}`;
+      const method = isNewFile ? 'POST' : 'PUT';
+      
+      const body = isNewFile 
+        ? { filename: currentFile.filename, content, frontmatter }
+        : { content, frontmatter, sha: currentFile.sha };
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const result: ApiResponse = await response.json();
+
+      if (result.success) {
+        // Refresh file list and clear editor
+        setHasLoaded(false); // Reset to allow reload
+        await loadFiles();
+        setCurrentFile(null);
+        setSelectedFile(null);
+      } else {
+        console.error('Failed to save file:', result.error);
+      }
+    } catch (err) {
+      console.error('Error saving file:', err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setCurrentFile(null);
+    setSelectedFile(null);
+  };
+
+  // TEMPORARY: Skip loading and session checks for testing
+  // if (status === 'loading') {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+  //         <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  // if (!session) {
+  //   return null; // Will redirect via useEffect
+  // }
+
+  // Prevent hydration mismatch - show loading until mounted
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Text Management
+            </h1>
+            <button
+              onClick={() => {
+                setHasLoaded(false);
+                loadFiles();
+              }}
+              disabled={isLoading}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50"
+              title="Load/Refresh files"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <User className="h-4 w-4" />
+              <span>{session?.user?.name || session?.user?.username || 'Test User'}</span>
+              <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                {session?.user?.role || 'developer'}
+              </span>
+            </div>
+            
+            <button
+              onClick={() => signOut()}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 
+                       hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </header>
+
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar - Hidden on mobile when editing */}
+        <div className={`w-80 flex-shrink-0 ${currentFile ? 'hidden lg:block' : 'block'}`}>
+          <FileList
+            files={files}
+            selectedFile={selectedFile || undefined}
+            onFileSelect={handleFileSelect}
+            onNewFile={handleNewFile}
+            isLoading={isLoading}
+          />
+        </div>
+
+        {/* Main Editor Area */}
+        <div className="flex-1 flex flex-col relative">
+          {selectedFile && !currentFile ? (
+            /* Loading state when file is selected but not yet loaded */
+            <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-gray-900 p-8">
+              <div className="text-center">
+                <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400">Loading {selectedFile}...</p>
+              </div>
+            </div>
+          ) : currentFile ? (
+            <div className="flex flex-col h-full">
+              {/* Mobile Back Button */}
+              <div className="lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+                <button
+                  onClick={handleCancelEdit}
+                  className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back to Files
+                </button>
+              </div>
+              
+              <div className="flex-1 relative">
+                {/* Loading overlay for file switching */}
+                {isEditorLoading && (
+                  <LoadingOverlay text={`Loading ${selectedFile}...`} />
+                )}
+                <MarkdownEditor
+                  file={currentFile}
+                  onSave={handleSaveFile}
+                  onCancel={handleCancelEdit}
+                  isLoading={isEditorLoading}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-gray-900 p-8">
+              <div className="text-center max-w-md mb-8">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Settings className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  Welcome to Text Management
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Select a file from the sidebar to start editing, or create a new file to get started.
+                </p>
+                <button
+                  onClick={handleNewFile}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Create Your First File
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Create File Modal */}
+      <CreateFileModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateFile}
+        existingFiles={files.map(f => f.name)}
+      />
+
+      {/* Toast Container */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+    </div>
+  );
+}
+
+// Export with dynamic import to prevent SSR
+export default dynamic(() => Promise.resolve(DashboardContent), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p className="text-gray-600 dark:text-gray-400">Loading Dashboard...</p>
+      </div>
+    </div>
+  )
+});
