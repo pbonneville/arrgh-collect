@@ -34,34 +34,69 @@ function initializeGitHubClient() {
 
 export class GitHubFileManager {
   /**
-   * List all markdown files in the repository root
+   * List all markdown files in the repository recursively
    */
   async listMarkdownFiles(): Promise<FileInfo[]> {
     try {
       const { octokit, config } = initializeGitHubClient();
-      const { data } = await octokit.rest.repos.getContent({
+      
+      // Get the default branch to find the latest tree SHA
+      const { data: repo } = await octokit.rest.repos.get({
         owner: config.owner,
         repo: config.repo,
-        path: '', // Repository root
+      });
+      
+      const defaultBranch = repo.default_branch;
+      
+      // Get the tree recursively
+      const { data: tree } = await octokit.rest.git.getTree({
+        owner: config.owner,
+        repo: config.repo,
+        tree_sha: defaultBranch,
+        recursive: 'true',
       });
 
-      if (!Array.isArray(data)) {
-        return [];
-      }
+      // Filter for .md files only and transform to FileInfo format
+      const markdownFiles = tree.tree
+        .filter(item => 
+          item.type === 'blob' && 
+          item.path && 
+          item.path.endsWith('.md')
+        )
+        .map(file => {
+          const pathParts = file.path!.split('/');
+          const filename = pathParts[pathParts.length - 1];
+          const directory = pathParts.length > 1 ? pathParts.slice(0, -1).join('/') : '';
+          
+          return {
+            name: filename,
+            path: file.path!,
+            directory,
+            sha: file.sha!,
+            size: file.size || 0,
+            type: 'file' as const,
+            download_url: undefined, // Tree API doesn't provide download URLs
+            git_url: file.url || undefined,
+            html_url: undefined, // Will be constructed if needed
+          };
+        });
 
-      // Filter for .md files only
-      return data
-        .filter(file => file.type === 'file' && file.name.endsWith('.md'))
-        .map(file => ({
-          name: file.name,
-          path: file.path,
-          sha: file.sha,
-          size: file.size,
-          type: 'file' as const,
-          download_url: file.download_url || undefined,
-          git_url: file.git_url || undefined,
-          html_url: file.html_url || undefined,
-        }));
+      // Sort files: root files first, then by directory, then by filename
+      markdownFiles.sort((a, b) => {
+        // Root files come first
+        if (!a.directory && b.directory) return -1;
+        if (a.directory && !b.directory) return 1;
+        
+        // Then sort by directory
+        if (a.directory !== b.directory) {
+          return a.directory.localeCompare(b.directory);
+        }
+        
+        // Finally sort by filename
+        return a.name.localeCompare(b.name);
+      });
+
+      return markdownFiles;
     } catch (error) {
       console.error('Error listing markdown files:', error);
       throw new Error('Failed to fetch file list from repository');

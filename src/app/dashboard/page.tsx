@@ -25,6 +25,7 @@ function DashboardContent() {
   const [isEditorLoading, setIsEditorLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false); // Guard to prevent multiple loads
+  const [repoInfo, setRepoInfo] = useState<{owner: string, repo: string, url: string} | null>(null);
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -62,6 +63,23 @@ function DashboardContent() {
   //     router.push('/');
   //   }
   // }, [status, router]);
+
+  // Load repository info
+  useEffect(() => {
+    const loadRepoInfo = async () => {
+      try {
+        const response = await fetch('/api/repo');
+        const result = await response.json();
+        if (result.success && result.data) {
+          setRepoInfo(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to load repo info:', error);
+      }
+    };
+    
+    loadRepoInfo();
+  }, []);
 
   // Load files on mount - but only once
   useEffect(() => {
@@ -200,6 +218,23 @@ function DashboardContent() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               {appConfig.app.displayName}
             </h1>
+            
+            {/* Repository Selector */}
+            <div className="flex items-center gap-2">
+              <select 
+                disabled
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 
+                         bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600
+                         rounded-md cursor-not-allowed opacity-75
+                         min-w-80 w-96"
+                value={repoInfo?.url || 'Loading...'}
+              >
+                <option value={repoInfo?.url || 'Loading...'}>
+                  {repoInfo?.url || 'Loading repository...'}
+                </option>
+              </select>
+            </div>
+            
             <button
               onClick={() => {
                 setHasLoaded(false);
@@ -214,14 +249,6 @@ function DashboardContent() {
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <User className="h-4 w-4" />
-              <span>{session?.user?.name || session?.user?.username || 'Test User'}</span>
-              <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                {session?.user?.role || 'developer'}
-              </span>
-            </div>
-            
             <button
               onClick={() => signOut({ callbackUrl: '/' })}
               className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 
@@ -245,6 +272,10 @@ function DashboardContent() {
             onFileSelect={handleFileSelect}
             onNewFile={handleNewFile}
             isLoading={isLoading}
+            userInfo={{
+              name: session?.user?.name || session?.user?.username || 'Test User',
+              role: session?.user?.role || 'developer'
+            }}
           />
         </div>
 
