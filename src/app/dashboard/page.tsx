@@ -223,7 +223,7 @@ function DashboardContent() {
             </div>
             
             <button
-              onClick={() => signOut()}
+              onClick={() => signOut({ callbackUrl: '/' })}
               className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 
                        hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
             >
