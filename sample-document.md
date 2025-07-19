@@ -2,10 +2,13 @@
 title: Sample Document
 author: Paul Bonneville
 status: published
-tags: [documentation, sample, guide]
+tags:
+  - documentation
+  - sample
+  - guide
+modified: '2025-07-19T00:12:30.245Z'
 ---
-
-# Sample Document
+# Sample Documents
 
 This is a sample document to demonstrate the text management system.
 
@@ -15,23 +18,23 @@ This document showcases various markdown features:
 
 ### Text Formatting
 
-- **Bold text** using double asterisks
-- *Italic text* using single asterisks
-- `Inline code` using backticks
-- ~~Strikethrough text~~ using tildes
+* **Bold text** using double asterisks
+* *Italic text* using single asterisks
+* `Inline code` using backticks
+* ~~Strikethrough text~~ using tildes
 
 ### Links and References
 
-- [External link](https://github.com)
-- [Internal reference](#overview)
+* [External link](https://github.com)
+* [Internal reference](#overview)
 
 ### Tables
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Headers | ✅ | Working |
-| Lists | ✅ | Working |
-| Tables | ✅ | Working |
+| Feature | Status | Notes   |
+| ------- | ------ | ------- |
+| Headers | ✅      | Working |
+| Lists   | ✅      | Working |
+| Tables  | ✅      | Working |
 
 ### Code Blocks
 
