@@ -164,7 +164,7 @@ export function FileList({
       {/* Footer */}
       {/* Footer - Fixed to bottom with dynamic width */}
       <div 
-        className="fixed bottom-0 left-0 p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-10"
+        className="fixed bottom-0 left-0 p-4 bg-gray-50 dark:bg-gray-800 rounded-tr-lg z-10"
         style={{ width: sidebarWidth || 320 }}
       >
         <div className="flex items-center justify-start gap-2 text-xs">
