@@ -96,16 +96,62 @@ Open [http://localhost:3000](http://localhost:3000) and sign in with GitHub!
 ```
 arrgh-collect/
 ├── src/
-│   └── app/                    # Next.js App Router
-│       ├── layout.tsx         # Root layout with metadata and fonts
-│       ├── page.tsx           # Landing page with feature preview
-│       └── globals.css        # Global styles
-├── public/                     # Static assets
-├── package.json               # Node.js 20.x engine specification
-├── next.config.ts             # Next.js configuration
-├── tsconfig.json              # TypeScript configuration
-├── CLAUDE.md                  # Development guidance
-└── README.md                  # Project documentation
+│   ├── app/                    # Next.js App Router
+│   │   ├── api/               # API routes
+│   │   │   ├── auth/          # NextAuth.js authentication
+│   │   │   │   └── [...nextauth]/
+│   │   │   │       └── route.ts
+│   │   │   ├── files/         # File management endpoints
+│   │   │   │   ├── [filename]/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── create/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── list/
+│   │   │   │       └── route.ts
+│   │   │   ├── repo/
+│   │   │   │   └── route.ts
+│   │   │   └── test-session/
+│   │   │       └── route.ts
+│   │   ├── dashboard/         # Main application interface
+│   │   │   └── page.tsx
+│   │   ├── test-editor/       # Editor testing page
+│   │   │   └── page.tsx
+│   │   ├── layout.tsx         # Root layout with providers
+│   │   ├── page.tsx           # Landing page with GitHub login
+│   │   ├── globals.css        # Global styles
+│   │   └── favicon.ico
+│   ├── components/            # Reusable React components
+│   │   ├── CreateFileModal.tsx # New file creation modal
+│   │   ├── FileList.tsx       # Repository file browser with resizable sidebar
+│   │   ├── FrontmatterForm.tsx # YAML metadata form
+│   │   ├── LoadingSpinner.tsx # Loading state components
+│   │   ├── MarkdownEditor.tsx # MDX editor with frontmatter
+│   │   ├── Providers.tsx      # NextAuth session provider
+│   │   ├── SimpleMarkdownEditor.tsx # Basic markdown editor
+│   │   ├── TestEditor.tsx     # Editor testing component
+│   │   └── Toast.tsx          # Toast notification system
+│   ├── lib/                   # Utility libraries
+│   │   ├── auth.ts           # NextAuth configuration
+│   │   └── github.ts         # GitHub API client with Git Tree API
+│   ├── types/                 # TypeScript definitions
+│   │   └── index.ts
+│   └── styles/                # Additional styling
+├── docs/                      # Documentation
+│   └── projects/
+│       └── PRDs/
+│           └── text_management_prd.md
+├── public/                    # Static assets
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── config.json               # Application configuration
+├── package.json              # Node.js 20.x dependencies and scripts
+├── next.config.ts            # Next.js configuration
+├── tsconfig.json             # TypeScript configuration
+├── CLAUDE.md                 # Development guidance for Claude Code
+└── README.md                 # Project documentation
 ```
 
 ### Available Scripts
@@ -114,6 +160,10 @@ arrgh-collect/
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+
+### Custom Commands
+
+This repository does not currently define any custom Claude Code commands. All development is done using standard npm scripts and git workflows.
 
 ## 🚀 Deployment
 
