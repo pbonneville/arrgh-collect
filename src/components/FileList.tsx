@@ -37,7 +37,7 @@ export function FileList({
   });
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900 overflow-hidden">
       {/* Header */}
       <div className="flex-shrink-0 p-4">
         <div className="flex items-center justify-between mb-3">
@@ -102,65 +102,64 @@ export function FileList({
             )}
           </div>
         ) : (
-          <div className="p-2">
+          <div className="p-2 overflow-hidden">
             {sortedDirectories.map((directory) => (
               <div key={directory} className="mb-4">
                 {/* Directory Header */}
                 {directory !== 'Root' && (
-                  <div className="flex items-center gap-2 px-2 py-1 mb-2">
-                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 px-2 py-1 mb-2 min-w-0">
+                    <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5l-2-2H5a2 2 0 00-2 2z" />
                     </svg>
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 truncate">
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 truncate min-w-0">
                       {directory}
                     </span>
                   </div>
                 )}
                 
                 {/* Files in this directory */}
-                {groupedFiles[directory].map((file) => (
-                  <button
-                    key={file.path}
-                    onClick={() => onFileSelect(file.path)}
-                    className={`w-full text-left p-3 rounded-md mb-1 transition-colors duration-200 ${
-                      directory !== 'Root' ? 'ml-4' : ''
-                    }
-                      ${selectedFile === file.path
-                        ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 text-blue-900 dark:text-blue-100'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
-                      }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <FileIcon className={`h-4 w-4 flex-shrink-0 ${
-                        selectedFile === file.path 
-                          ? 'text-blue-600 dark:text-blue-400' 
-                          : 'text-gray-400'
-                      }`} />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-medium truncate">
-                            {file.name.replace('.md', '')}
-                          </p>
-                          <span className={`text-xs font-medium flex-shrink-0 ${
-                            selectedFile === file.path
-                              ? 'text-blue-900/50 dark:text-blue-100/50'
-                              : 'text-gray-700/50 dark:text-gray-300/50'
-                          }`}>
-                            {formatFileSize(file.size)}
-                          </span>
+                <div className={directory !== 'Root' ? 'ml-4' : ''}>
+                  {groupedFiles[directory].map((file) => (
+                    <div className={`w-full rounded-md mb-1 transition-colors duration-200 ${
+                      selectedFile === file.path
+                        ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700'
+                        : ''
+                    }`}>
+                      <button
+                        key={file.path}
+                        onClick={() => onFileSelect(file.path)}
+                        title={file.path}
+                        className={`w-full text-left p-3 rounded-md transition-colors duration-200
+                          ${selectedFile === file.path
+                            ? 'text-blue-900 dark:text-blue-100'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileIcon className={`h-4 w-4 flex-shrink-0 ${
+                            selectedFile === file.path 
+                              ? 'text-blue-600 dark:text-blue-400' 
+                              : 'text-gray-400'
+                          }`} />
+                          <div className="min-w-0 flex-1 overflow-hidden">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-sm font-medium truncate">
+                                {file.name.replace('.md', '')}
+                              </p>
+                              <span className={`text-xs font-medium flex-shrink-0 ${
+                                selectedFile === file.path
+                                  ? 'text-blue-900/50 dark:text-blue-100/50'
+                                  : 'text-gray-700/50 dark:text-gray-300/50'
+                              }`}>
+                                {formatFileSize(file.size)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        {directory !== 'Root' && (
-                          <p 
-                            className="text-xs text-gray-500 dark:text-gray-400 truncate" 
-                            title={file.path}
-                          >
-                            {file.directory}
-                          </p>
-                        )}
-                      </div>
+                      </button>
                     </div>
-                  </button>
-                ))}
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -168,12 +167,12 @@ export function FileList({
       </div>
 
       {/* Footer */}
-      <div className="fixed bottom-0 left-0 w-80 p-4 bg-gray-50 dark:bg-gray-800 z-10">
+      <div className="flex-shrink-0 p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-center gap-2 text-xs">
-          <span className="font-medium text-gray-700 dark:text-gray-300">
+          <span className="font-medium text-gray-700 dark:text-gray-300 truncate">
             {userInfo?.name || 'Loading...'}
           </span>
-          <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full font-medium">
+          <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full font-medium flex-shrink-0">
             {userInfo?.role || 'Loading...'}
           </span>
         </div>

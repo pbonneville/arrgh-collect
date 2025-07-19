@@ -26,10 +26,20 @@ function DashboardContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false); // Guard to prevent multiple loads
   const [repoInfo, setRepoInfo] = useState<{owner: string, repo: string, url: string} | null>(null);
+  const [sidebarWidth, setSidebarWidth] = useState(320); // Default 320px (w-80)
+  const [isResizing, setIsResizing] = useState(false);
 
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
+    // Load saved sidebar width from localStorage
+    const savedWidth = localStorage.getItem('sidebar-width');
+    if (savedWidth) {
+      const width = parseInt(savedWidth, 10);
+      if (width >= 240 && width <= 600) { // Validate range
+        setSidebarWidth(width);
+      }
+    }
   }, []);
 
   const loadFiles = useCallback(async () => {
@@ -181,6 +191,46 @@ function DashboardContent() {
     setSelectedFile(null);
   };
 
+  // Sidebar resize handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    setIsResizing(true);
+    e.preventDefault();
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const newWidth = e.clientX;
+    const minWidth = 240; // Minimum sidebar width
+    const maxWidth = Math.min(600, window.innerWidth * 0.4); // Max 40% of window width or 600px
+    
+    if (newWidth >= minWidth && newWidth <= maxWidth) {
+      setSidebarWidth(newWidth);
+      localStorage.setItem('sidebar-width', newWidth.toString());
+    }
+  }, [isResizing]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  // Add global mouse event listeners for resizing
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+    }
+  }, [isResizing, handleMouseMove, handleMouseUp]);
+
   // TEMPORARY: Skip loading and session checks for testing
   // if (status === 'loading') {
   //   return (
@@ -265,7 +315,10 @@ function DashboardContent() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar - Hidden on mobile when editing */}
-        <div className={`w-80 flex-shrink-0 ${currentFile ? 'hidden lg:block' : 'block'}`}>
+        <div 
+          className={`flex-shrink-0 relative ${currentFile ? 'hidden lg:block' : 'block'}`}
+          style={{ width: sidebarWidth }}
+        >
           <FileList
             files={files}
             selectedFile={selectedFile || undefined}
@@ -277,6 +330,15 @@ function DashboardContent() {
               role: session?.user?.role || 'developer'
             }}
           />
+          
+          {/* Resize Handle */}
+          <div
+            className={`absolute top-0 right-0 w-1 h-full cursor-ew-resize bg-transparent hover:bg-blue-500 hover:bg-opacity-50 transition-colors duration-200 group ${isResizing ? 'bg-blue-500 bg-opacity-50' : ''}`}
+            onMouseDown={handleMouseDown}
+          >
+            {/* Visual indicator */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-8 bg-gray-300 group-hover:bg-blue-500 transition-colors duration-200 rounded-full"></div>
+          </div>
         </div>
 
         {/* Main Editor Area */}
