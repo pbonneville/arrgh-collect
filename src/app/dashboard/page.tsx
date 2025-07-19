@@ -9,7 +9,7 @@ import { CreateFileModal } from '@/components/CreateFileModal';
 import { ToastContainer, useToasts } from '@/components/Toast';
 import { LoadingOverlay } from '@/components/LoadingSpinner';
 import { FileInfo, MarkdownFile, FrontmatterData, ApiResponse } from '@/types';
-import { LogOut, Settings, RefreshCw } from 'lucide-react';
+import { LogOut, Settings, RefreshCw, Target, GitBranch } from 'lucide-react';
 import appConfig from '../../../config.json';
 
 function DashboardContent() {
@@ -279,34 +279,67 @@ function DashboardContent() {
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               {appConfig.app.displayName}
             </h1>
+          </div>
+          
+          {/* Centered Repository Selectors with Reload Button */}
+          <div className="flex items-center gap-1">
+            {/* Source Repository Icon */}
+            <GitBranch className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-1" title="Source Repo" />
             
-            {/* Repository Selector */}
-            <div className="flex items-center gap-2">
-              <select 
-                disabled
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 
-                         bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600
-                         rounded-md cursor-not-allowed opacity-75
-                         min-w-80 w-96"
-                value={repoInfo?.url || 'Loading...'}
-              >
-                <option value={repoInfo?.url || 'Loading...'}>
-                  {repoInfo?.url || 'Loading repository...'}
-                </option>
-              </select>
-            </div>
-            
+            {/* First Repository Selector */}
+            <select 
+              disabled
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 
+                       bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600
+                       rounded-md cursor-not-allowed opacity-75
+                       min-w-80 w-96"
+              value={repoInfo?.url || 'Loading...'}
+            >
+              <option value={repoInfo?.url || 'Loading...'}>
+                {repoInfo?.url || 'Loading repository...'}
+              </option>
+            </select>
+
             <button
               onClick={() => {
                 setHasLoaded(false);
                 loadFiles();
               }}
               disabled={isLoading}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50"
+              className="p-1 mr-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50"
+              title="Load/Refresh files"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+
+            {/* Target Repository Icon */}
+            <Target className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-1" title="Destination Repo" />
+            
+            {/* Second Repository Selector */}
+            <select 
+              disabled
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 
+                       bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600
+                       rounded-md cursor-not-allowed opacity-75
+                       min-w-80 w-96"
+              value={repoInfo?.url || 'Loading...'}
+            >
+              <option value={repoInfo?.url || 'Loading...'}>
+                {repoInfo?.url || 'Loading repository...'}
+              </option>
+            </select>
+
+            <button
+              onClick={() => {
+                setHasLoaded(false);
+                loadFiles();
+              }}
+              disabled={isLoading}
+              className="p-1 mr-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50"
               title="Load/Refresh files"
             >
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -353,8 +386,14 @@ function DashboardContent() {
             className={`absolute top-0 right-0 w-1 h-full cursor-ew-resize bg-transparent hover:bg-blue-500 hover:bg-opacity-50 transition-colors duration-200 group ${isResizing ? 'bg-blue-500 bg-opacity-50' : ''}`}
             onMouseDown={handleMouseDown}
           >
-            {/* Visual indicator */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-8 bg-gray-300 group-hover:bg-blue-500 transition-colors duration-200 rounded-full"></div>
+            {/* Visual indicator - centered on viewport */}
+            <div 
+              className="fixed left-1/2 w-0.5 h-8 bg-gray-300 group-hover:bg-blue-500 transition-colors duration-200 rounded-full transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ 
+                top: '50vh',
+                left: `${sidebarWidth - 2}px`
+              }}
+            ></div>
           </div>
         </div>
 
