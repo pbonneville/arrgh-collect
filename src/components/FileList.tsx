@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileIcon, PlusIcon, SearchIcon } from 'lucide-react';
+import { FileIcon, PlusIcon, SearchIcon, UserIcon } from 'lucide-react';
 import { FileListProps } from '@/types';
 
 export function FileList({ 
@@ -121,46 +121,38 @@ export function FileList({
                 {/* Files in this directory */}
                 <div className={directory !== 'Root' ? 'ml-4' : ''}>
                   {groupedFiles[directory].map((file) => (
-                    <div 
+                    <button
                       key={file.path}
-                      className={`w-full rounded-md mb-1 transition-colors duration-200 ${
+                      onClick={() => onFileSelect(file.path)}
+                      title={file.path}
+                      className={`w-full text-left px-3 py-2 rounded-md mb-1 transition-colors duration-200 ${
                         selectedFile === file.path
-                          ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700'
-                          : ''
+                          ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 text-blue-900 dark:text-blue-100'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                       }`}
                     >
-                      <button
-                        onClick={() => onFileSelect(file.path)}
-                        title={file.path}
-                        className={`w-full text-left px-3 py-2 rounded-md transition-colors duration-200
-                          ${selectedFile === file.path
-                            ? 'text-blue-900 dark:text-blue-100'
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
-                          }`}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <FileIcon className={`h-4 w-4 flex-shrink-0 ${
-                            selectedFile === file.path 
-                              ? 'text-blue-600 dark:text-blue-400' 
-                              : 'text-gray-400'
-                          }`} />
-                          <div className="min-w-0 flex-1 overflow-hidden">
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="text-sm font-medium truncate">
-                                {file.name.replace('.md', '')}
-                              </p>
-                              <span className={`text-xs font-medium flex-shrink-0 ${
-                                selectedFile === file.path
-                                  ? 'text-blue-900/50 dark:text-blue-100/50'
-                                  : 'text-gray-700/50 dark:text-gray-300/50'
-                              }`}>
-                                {formatFileSize(file.size)}
-                              </span>
-                            </div>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileIcon className={`h-4 w-4 flex-shrink-0 ${
+                          selectedFile === file.path 
+                            ? 'text-blue-600 dark:text-blue-400' 
+                            : 'text-gray-400'
+                        }`} />
+                        <div className="min-w-0 flex-1 overflow-hidden">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-medium truncate">
+                              {file.name.replace('.md', '')}
+                            </p>
+                            <span className={`text-xs font-medium flex-shrink-0 ${
+                              selectedFile === file.path
+                                ? 'text-blue-900/50 dark:text-blue-100/50'
+                                : 'text-gray-700/50 dark:text-gray-300/50'
+                            }`}>
+                              {formatFileSize(file.size)}
+                            </span>
                           </div>
                         </div>
-                      </button>
-                    </div>
+                      </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -175,7 +167,8 @@ export function FileList({
         className="fixed bottom-0 left-0 p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-10"
         style={{ width: sidebarWidth || 320 }}
       >
-        <div className="flex items-center justify-center gap-2 text-xs">
+        <div className="flex items-center justify-start gap-2 text-xs">
+          <UserIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
           <span className="font-medium text-gray-700 dark:text-gray-300 truncate">
             {userInfo?.name || 'Loading...'}
           </span>

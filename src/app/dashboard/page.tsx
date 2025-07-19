@@ -9,7 +9,7 @@ import { CreateFileModal } from '@/components/CreateFileModal';
 import { ToastContainer, useToasts } from '@/components/Toast';
 import { LoadingOverlay } from '@/components/LoadingSpinner';
 import { FileInfo, MarkdownFile, FrontmatterData, ApiResponse } from '@/types';
-import { LogOut, User, Settings, RefreshCw } from 'lucide-react';
+import { LogOut, Settings, RefreshCw } from 'lucide-react';
 import appConfig from '../../../config.json';
 
 function DashboardContent() {
@@ -32,11 +32,11 @@ function DashboardContent() {
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
-    // Load saved sidebar width from localStorage
+    // Load saved sidebar width from localStorage with enhanced validation
     const savedWidth = localStorage.getItem('sidebar-width');
-    if (savedWidth) {
+    if (savedWidth && /^\d+$/.test(savedWidth.trim())) {
       const width = parseInt(savedWidth, 10);
-      if (width >= 240 && width <= 600) { // Validate range
+      if (!isNaN(width) && width >= 240 && width <= 600) { // Validate range and NaN
         setSidebarWidth(width);
       }
     }
@@ -103,6 +103,7 @@ function DashboardContent() {
       const response = await fetch(`/api/files/${encodeURIComponent(filename)}`, {
         credentials: 'include',
       });
+      
       const result: ApiResponse<MarkdownFile> = await response.json();
       
       // Validate that the response matches the requested file (prevent race conditions)
@@ -110,12 +111,15 @@ function DashboardContent() {
         setCurrentFile(result.data);
       } else if (result.success && result.data && result.data.filename !== filename) {
         // Don't update state with stale response
+        console.warn('Discarding stale file response:', result.data.filename, 'expected:', filename);
         return;
       } else {
         console.error('API error:', result.error);
+        setCurrentFile(null);
       }
     } catch (err) {
       console.error('Error loading file:', err);
+      setCurrentFile(null);
     } finally {
       setIsEditorLoading(false);
     }
@@ -200,7 +204,18 @@ function DashboardContent() {
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isResizing) return;
     
-    const newWidth = e.clientX;
+    // Throttle the resize for better performance
+    const now = Date.now();
+    const lastCall = (handleMouseMove as unknown as { lastCall?: number }).lastCall || 0;
+    if (now - lastCall < 16) return; // ~60fps
+    (handleMouseMove as unknown as { lastCall: number }).lastCall = now;
+    
+    // Calculate relative width instead of using absolute e.clientX
+    const sidebar = document.querySelector('[data-sidebar]') as HTMLElement;
+    if (!sidebar) return;
+    
+    const sidebarRect = sidebar.getBoundingClientRect();
+    const newWidth = e.clientX - sidebarRect.left;
     const minWidth = 240; // Minimum sidebar width
     const maxWidth = Math.min(600, window.innerWidth * 0.4); // Max 40% of window width or 600px
     
@@ -316,6 +331,7 @@ function DashboardContent() {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar - Hidden on mobile when editing */}
         <div 
+          data-sidebar
           className={`flex-shrink-0 relative ${currentFile ? 'hidden lg:block' : 'block'}`}
           style={{ width: sidebarWidth }}
         >
