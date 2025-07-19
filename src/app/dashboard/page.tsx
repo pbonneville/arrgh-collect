@@ -9,7 +9,7 @@ import { CreateFileModal } from '@/components/CreateFileModal';
 import { ToastContainer, useToasts } from '@/components/Toast';
 import { LoadingOverlay } from '@/components/LoadingSpinner';
 import { FileInfo, MarkdownFile, FrontmatterData, ApiResponse } from '@/types';
-import { LogOut, User, Settings, RefreshCw } from 'lucide-react';
+import { LogOut, Settings, RefreshCw } from 'lucide-react';
 import appConfig from '../../../config.json';
 
 function DashboardContent() {
@@ -26,10 +26,20 @@ function DashboardContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false); // Guard to prevent multiple loads
   const [repoInfo, setRepoInfo] = useState<{owner: string, repo: string, url: string} | null>(null);
+  const [sidebarWidth, setSidebarWidth] = useState(320); // Default 320px (w-80)
+  const [isResizing, setIsResizing] = useState(false);
 
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
+    // Load saved sidebar width from localStorage with enhanced validation
+    const savedWidth = localStorage.getItem('sidebar-width');
+    if (savedWidth && /^\d+$/.test(savedWidth.trim())) {
+      const width = parseInt(savedWidth, 10);
+      if (!isNaN(width) && width >= 240 && width <= 600) { // Validate range and NaN
+        setSidebarWidth(width);
+      }
+    }
   }, []);
 
   const loadFiles = useCallback(async () => {
@@ -93,6 +103,7 @@ function DashboardContent() {
       const response = await fetch(`/api/files/${encodeURIComponent(filename)}`, {
         credentials: 'include',
       });
+      
       const result: ApiResponse<MarkdownFile> = await response.json();
       
       // Validate that the response matches the requested file (prevent race conditions)
@@ -100,12 +111,15 @@ function DashboardContent() {
         setCurrentFile(result.data);
       } else if (result.success && result.data && result.data.filename !== filename) {
         // Don't update state with stale response
+        console.warn('Discarding stale file response:', result.data.filename, 'expected:', filename);
         return;
       } else {
         console.error('API error:', result.error);
+        setCurrentFile(null);
       }
     } catch (err) {
       console.error('Error loading file:', err);
+      setCurrentFile(null);
     } finally {
       setIsEditorLoading(false);
     }
@@ -180,6 +194,57 @@ function DashboardContent() {
     setCurrentFile(null);
     setSelectedFile(null);
   };
+
+  // Sidebar resize handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    setIsResizing(true);
+    e.preventDefault();
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    // Throttle the resize for better performance
+    const now = Date.now();
+    const lastCall = (handleMouseMove as unknown as { lastCall?: number }).lastCall || 0;
+    if (now - lastCall < 16) return; // ~60fps
+    (handleMouseMove as unknown as { lastCall: number }).lastCall = now;
+    
+    // Calculate relative width instead of using absolute e.clientX
+    const sidebar = document.querySelector('[data-sidebar]') as HTMLElement;
+    if (!sidebar) return;
+    
+    const sidebarRect = sidebar.getBoundingClientRect();
+    const newWidth = e.clientX - sidebarRect.left;
+    const minWidth = 240; // Minimum sidebar width
+    const maxWidth = Math.min(600, window.innerWidth * 0.4); // Max 40% of window width or 600px
+    
+    if (newWidth >= minWidth && newWidth <= maxWidth) {
+      setSidebarWidth(newWidth);
+      localStorage.setItem('sidebar-width', newWidth.toString());
+    }
+  }, [isResizing]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  // Add global mouse event listeners for resizing
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+    }
+  }, [isResizing, handleMouseMove, handleMouseUp]);
 
   // TEMPORARY: Skip loading and session checks for testing
   // if (status === 'loading') {
@@ -265,18 +330,32 @@ function DashboardContent() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar - Hidden on mobile when editing */}
-        <div className={`w-80 flex-shrink-0 ${currentFile ? 'hidden lg:block' : 'block'}`}>
+        <div 
+          data-sidebar
+          className={`flex-shrink-0 relative ${currentFile ? 'hidden lg:block' : 'block'}`}
+          style={{ width: sidebarWidth }}
+        >
           <FileList
             files={files}
             selectedFile={selectedFile || undefined}
             onFileSelect={handleFileSelect}
             onNewFile={handleNewFile}
             isLoading={isLoading}
+            sidebarWidth={sidebarWidth}
             userInfo={{
               name: session?.user?.name || session?.user?.username || 'Test User',
               role: session?.user?.role || 'developer'
             }}
           />
+          
+          {/* Resize Handle */}
+          <div
+            className={`absolute top-0 right-0 w-1 h-full cursor-ew-resize bg-transparent hover:bg-blue-500 hover:bg-opacity-50 transition-colors duration-200 group ${isResizing ? 'bg-blue-500 bg-opacity-50' : ''}`}
+            onMouseDown={handleMouseDown}
+          >
+            {/* Visual indicator */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-8 bg-gray-300 group-hover:bg-blue-500 transition-colors duration-200 rounded-full"></div>
+          </div>
         </div>
 
         {/* Main Editor Area */}
