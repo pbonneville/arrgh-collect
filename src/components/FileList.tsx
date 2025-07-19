@@ -10,8 +10,9 @@ export function FileList({
   onFileSelect, 
   onNewFile, 
   isLoading = false,
+  sidebarWidth,
   userInfo 
-}: FileListProps & { userInfo?: { name?: string; role?: string } }) {
+}: FileListProps & { sidebarWidth?: number; userInfo?: { name?: string; role?: string } }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredFiles = files.filter(file =>
@@ -120,16 +121,18 @@ export function FileList({
                 {/* Files in this directory */}
                 <div className={directory !== 'Root' ? 'ml-4' : ''}>
                   {groupedFiles[directory].map((file) => (
-                    <div className={`w-full rounded-md mb-1 transition-colors duration-200 ${
-                      selectedFile === file.path
-                        ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700'
-                        : ''
-                    }`}>
+                    <div 
+                      key={file.path}
+                      className={`w-full rounded-md mb-1 transition-colors duration-200 ${
+                        selectedFile === file.path
+                          ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700'
+                          : ''
+                      }`}
+                    >
                       <button
-                        key={file.path}
                         onClick={() => onFileSelect(file.path)}
                         title={file.path}
-                        className={`w-full text-left p-3 rounded-md transition-colors duration-200
+                        className={`w-full text-left px-3 py-2 rounded-md transition-colors duration-200
                           ${selectedFile === file.path
                             ? 'text-blue-900 dark:text-blue-100'
                             : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
@@ -167,7 +170,11 @@ export function FileList({
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      {/* Footer - Fixed to bottom with dynamic width */}
+      <div 
+        className="fixed bottom-0 left-0 p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-10"
+        style={{ width: sidebarWidth || 320 }}
+      >
         <div className="flex items-center justify-center gap-2 text-xs">
           <span className="font-medium text-gray-700 dark:text-gray-300 truncate">
             {userInfo?.name || 'Loading...'}

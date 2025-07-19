@@ -325,6 +325,7 @@ function DashboardContent() {
             onFileSelect={handleFileSelect}
             onNewFile={handleNewFile}
             isLoading={isLoading}
+            sidebarWidth={sidebarWidth}
             userInfo={{
               name: session?.user?.name || session?.user?.username || 'Test User',
               role: session?.user?.role || 'developer'
