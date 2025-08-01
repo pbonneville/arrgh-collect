@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthContext } from '@/lib/api-auth';
 
-interface ContentExtractionRequest {
+interface HighlightProcessingRequest {
   highlight_id: string;
   url: string;
   highlighted_text: string;
@@ -49,7 +49,7 @@ export async function POST(
       .single();
 
     console.log('Database query result:', { 
-      highlight: highlight ? { id: highlight.id, url: highlight.url, title: highlight.title } : null, 
+      highlight: highlight ? { id: highlight.id, page_url: highlight.page_url, page_title: highlight.page_title } : null, 
       error: fetchError 
     });
 
@@ -62,11 +62,11 @@ export async function POST(
     }
 
     // Prepare request for backend content extraction service
-    const extractionRequest: ContentExtractionRequest = {
+    const extractionRequest: HighlightProcessingRequest = {
       highlight_id: highlightId,
-      url: highlight.url,
+      url: highlight.page_url, // Use page_url from database
       highlighted_text: highlight.highlighted_text,
-      page_title: highlight.title
+      page_title: highlight.page_title // Use page_title from database
     };
 
     // Call backend Firecrawl service
@@ -80,7 +80,7 @@ export async function POST(
       url: `${BACKEND_API_URL}/highlights/extract-content`,
       extractionRequest: {
         ...extractionRequest,
-        url: extractionRequest.url.toString()
+        url: extractionRequest.url
       }
     });
 
