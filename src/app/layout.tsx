@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { ThemeProvider } from '@/theme/ThemeProvider';
+import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 import appConfig from "../../config.json";
 
 const geistSans = Geist({
@@ -26,13 +29,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          {children}
-        </Providers>
+        {/* Material UI Color Scheme Script - must be before any content */}
+        <InitColorSchemeScript attribute="data" />
+        
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          <ThemeProvider>
+            <Providers>
+              {children}
+            </Providers>
+          </ThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );

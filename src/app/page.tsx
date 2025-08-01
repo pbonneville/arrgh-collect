@@ -1,108 +1,308 @@
 'use client';
 
-import { useSession, signIn } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Grid2 as Grid,
+  Card,
+  CardContent,
+  CircularProgress,
+  Paper,
+  Stack,
+  Chip,
+  Alert,
+} from '@mui/material';
+import {
+  Email as EmailIcon,
+  Edit as EditIcon,
+  Lightbulb as LightbulbIcon,
+  MenuBook as MenuBookIcon,
+} from '@mui/icons-material';
+import { alpha, useTheme } from '@mui/material/styles';
 import appConfig from '../../config.json';
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { user, loading, signInWithMagicLink, authState } = useAuth();
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const theme = useTheme();
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       router.push('/dashboard');
     }
-  }, [session, router]);
+  }, [user, router]);
 
-  if (status === 'loading') {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-        </div>
-      </div>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.2)} 100%)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress size={32} sx={{ mb: 2 }} />
+          <Typography variant="body2" color="text.secondary">
+            Loading...
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <main className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-6xl font-bold text-gray-900 dark:text-white mb-6">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.2)} 100%)`,
+      }}
+    >
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Box sx={{ textAlign: 'center', mb: 8 }}>
+          {/* Hero Section */}
+          <Typography
+            variant="h1"
+            component="h1"
+            sx={{
+              fontWeight: 700,
+              mb: 3,
+              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+            }}
+          >
             {appConfig.app.displayName}
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+          </Typography>
+          
+          <Typography
+            variant="h2"
+            component="p"
+            color="text.secondary"
+            sx={{ mb: 4, maxWidth: '800px', mx: 'auto' }}
+          >
             {appConfig.app.description}
-          </p>
+          </Typography>
           
-          <div className="mb-12">
-            <button
-              onClick={() => signIn('github')}
-              className="inline-flex items-center gap-3 px-8 py-4 text-lg font-semibold text-white 
-                       bg-gray-900 hover:bg-gray-800 focus:bg-gray-800
-                       border border-transparent rounded-lg 
-                       focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-                       transition-colors duration-200"
+          {/* Feature Highlights */}
+          <Paper
+            elevation={1}
+            sx={{
+              p: 3,
+              mb: 6,
+              maxWidth: '900px',
+              mx: 'auto',
+              bgcolor: alpha(theme.palette.primary.main, 0.05),
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
+            }}
+          >
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              spacing={3}
+              justifyContent="center"
+              alignItems="center"
             >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              Login with GitHub
-            </button>
-          </div>
+              <Chip
+                icon={<Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main' }} />}
+                label="Capture highlights anywhere"
+                variant="outlined"
+                sx={{ fontSize: '0.875rem' }}
+              />
+              <Chip
+                icon={<Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} />}
+                label="AI extracts entities & relationships"
+                variant="outlined"
+                sx={{ fontSize: '0.875rem' }}
+              />
+              <Chip
+                icon={<Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'secondary.main' }} />}
+                label="Build your knowledge graph"
+                variant="outlined"
+                sx={{ fontSize: '0.875rem' }}
+              />
+            </Stack>
+          </Paper>
           
-          <div className="grid md:grid-cols-3 gap-8 mt-16">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                File Management
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Browse and manage markdown files directly from your GitHub repository.
-              </p>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Pull Request Workflow
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                All changes create pull requests for review and collaboration.
-              </p>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                GitHub Integration
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Built on GitHub OAuth with repository-based permissions and security.
-              </p>
-            </div>
-          </div>
+          {/* Email Signup Form */}
+          <Box sx={{ mb: 8, maxWidth: '400px', mx: 'auto' }}>
+            <TextField
+              type="email"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              variant="outlined"
+              sx={{ mb: 2 }}
+              InputProps={{
+                sx: { borderRadius: 2 }
+              }}
+            />
+            <Button
+              onClick={() => signInWithMagicLink(email)}
+              disabled={!email || authState.isSigningIn}
+              variant="contained"
+              size="large"
+              fullWidth
+              startIcon={
+                authState.isSigningIn ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <EmailIcon />
+                )
+              }
+              sx={{
+                py: 1.5,
+                fontSize: '1.125rem',
+                fontWeight: 600,
+                borderRadius: 2,
+              }}
+            >
+              {authState.isSigningIn ? 'Sending Magic Link...' : 'Get Started with Magic Link'}
+            </Button>
+            {authState.error && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {authState.error.message}
+              </Alert>
+            )}
+          </Box>
+        </Box>
+        
+        {/* Features Grid */}
+        <Grid container spacing={4} sx={{ mb: 8 }}>
+          <Grid xs={12} md={4}>
+            <Card
+              elevation={2}
+              sx={{
+                height: '100%',
+                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: theme.shadows[8],
+                },
+              }}
+            >
+              <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2,
+                  }}
+                >
+                  <EditIcon sx={{ color: 'primary.main' }} />
+                </Box>
+                <Typography variant="h3" component="h3" sx={{ mb: 1 }}>
+                  One-Click Capture
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Highlight any text on any website with our bookmarklet. Instantly save insights to your personal knowledge base.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
           
-        </div>
-      </main>
+          <Grid xs={12} md={4}>
+            <Card
+              elevation={2}
+              sx={{
+                height: '100%',
+                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: theme.shadows[8],
+                },
+              }}
+            >
+              <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2,
+                  }}
+                >
+                  <LightbulbIcon sx={{ color: 'success.main' }} />
+                </Box>
+                <Typography variant="h3" component="h3" sx={{ mb: 1 }}>
+                  AI Knowledge Graph
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Automatically extract entities, topics, and relationships from your highlights using advanced AI processing.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid xs={12} md={4}>
+            <Card
+              elevation={2}
+              sx={{
+                height: '100%',
+                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: theme.shadows[8],
+                },
+              }}
+            >
+              <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: alpha(theme.palette.secondary.main, 0.1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2,
+                  }}
+                >
+                  <MenuBookIcon sx={{ color: 'secondary.main' }} />
+                </Box>
+                <Typography variant="h3" component="h3" sx={{ mb: 1 }}>
+                  Smart Organization
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  All content stored as portable Markdown with YAML front matter. Your knowledge remains yours, forever.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
       
-      <footer className="container mx-auto px-4 py-8 text-center text-gray-600 dark:text-gray-400">
-        <p>Built with Next.js, GitHub OAuth, and Tailwind CSS</p>
-      </footer>
-    </div>
+      {/* Footer */}
+      <Box sx={{ py: 4, textAlign: 'center' }}>
+        <Container maxWidth="lg">
+          <Typography variant="body2" color="text.secondary">
+            Built with Next.js, Supabase, FastAPI, and AI-powered knowledge management
+          </Typography>
+        </Container>
+      </Box>
+    </Box>
   );
 }
