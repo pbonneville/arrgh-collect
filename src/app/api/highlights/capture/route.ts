@@ -88,24 +88,22 @@ export async function POST(request: NextRequest) {
       ? page_title.substring(0, 500) 
       : null;
 
+    // Format highlighted text as markdown quote with URL
+    const formattedContent = `> ${highlighted_text.trim()}\n\n${page_url.trim()}`;
+
     // Save highlight to database with queued status
     const supabase = await createClient();
     const { data: highlight, error } = await supabase
       .from('highlights')
       .insert({
         user_id: userId,
-        highlighted_text: highlighted_text.trim(),
+        highlighted_text: formattedContent,
+        original_quote: highlighted_text.trim(), // Store the original unmodified text
         title: sanitizedTitle || 'Untitled Page',
-        content: highlighted_text.trim(), // Required field
+        content: formattedContent, // Required field
         markdown_content: '', // Empty string - will be set by async extraction
         url: page_url.trim(),
-        domain: new URL(page_url).hostname,
-        metadata: {
-          captured_via: 'bookmarklet',
-          original_page_title: sanitizedTitle,
-          content_status: 'queued', // Indicate content extraction is queued
-          queued_at: new Date().toISOString()
-        }
+        domain: new URL(page_url).hostname
       })
       .select('id')
       .single();
@@ -122,89 +120,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log('Highlight saved successfully, queuing background extraction:', highlight.id);
-
-    // Queue background content extraction
-    let contentStatus = 'queued';
-    let processingStarted = false;
-    let responseMessage = 'Highlight saved! Content extraction queued.';
-
-    try {
-      const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:8000';
-      const backendApiKey = process.env.BACKEND_API_KEY || 'dev-key';
-
-      console.log('Calling backend for async extraction:', {
-        backendUrl,
-        highlightId: highlight.id,
-        hasApiKey: !!backendApiKey
-      });
-
-      // Create 30-second timeout for the backend call
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-      const backendResponse = await fetch(`${backendUrl}/highlights/capture-and-extract`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': backendApiKey
-        },
-        body: JSON.stringify({
-          highlight_id: highlight.id,
-          url: page_url.trim(),
-          highlighted_text: highlighted_text.trim(),
-          page_title: sanitizedTitle,
-          user_id: userId
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (backendResponse.ok) {
-        const backendResult = await backendResponse.json();
-        contentStatus = backendResult.content_status || 'queued';
-        processingStarted = backendResult.processing_started || false;
-        responseMessage = backendResult.message || 'Highlight saved! Content extraction queued.';
-        
-        console.log('Backend extraction queued successfully:', {
-          highlightId: highlight.id,
-          contentStatus,
-          processingStarted
-        });
-      } else {
-        console.error('Backend extraction queueing failed:', {
-          status: backendResponse.status,
-          statusText: backendResponse.statusText
-        });
-        contentStatus = 'failed';
-        responseMessage = 'Highlight saved! Content extraction will be processed later.';
-      }
-
-    } catch (error) {
-      console.error('Error calling backend for extraction:', error);
-      
-      // Update database to reflect failed status
-      await supabase
-        .from('highlights')
-        .update({
-          metadata: {
-            captured_via: 'bookmarklet',
-            original_page_title: sanitizedTitle,
-            content_status: 'failed',
-            queued_at: new Date().toISOString(),
-            error_message: error instanceof Error ? error.message : 'Backend call failed'
-          }
-        })
-        .eq('id', highlight.id);
-
-      contentStatus = 'failed';
-      responseMessage = 'Highlight saved! Content extraction will be processed later.';
-    }
+    console.log('Highlight saved successfully:', highlight.id);
 
     const response: HighlightCaptureResponse = {
       success: true,
-      message: responseMessage,
+      message: 'Highlight saved successfully!',
       highlightId: highlight.id,
     };
 
